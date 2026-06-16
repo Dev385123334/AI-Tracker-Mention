@@ -1,0 +1,548 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  avatarUrl String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizations      OrganizationMember[]
+  projects           Project[]
+  auditLogs          AuditLog[]
+  emailNotifications EmailNotification[]
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   OrganizationMember[]
+  projects  Project[]
+  auditLogs AuditLog[]
+}
+
+model OrganizationMember {
+  id             String   @id @default(cuid())
+  role           String   @default("member")
+  invitedEmail   String?
+  joinedAt       DateTime?
+  createdAt      DateTime @default(now())
+
+  userId         String?
+  user           User?           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organizationId String
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, userId])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  brandName   String
+  domain      String
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  competitors       Competitor[]
+  keywords          Keyword[]
+  auditLogs         AuditLog[]
+  monitoringJobs    MonitoringJob[]
+  visibilityMetrics VisibilityMetric[]
+  geoScores         GeoScore[]
+  recommendations   Recommendation[]
+  reports           Report[]
+  reportSchedules   ReportSchedule[]
+  emailNotifications EmailNotification[]
+
+  agentRuns           AgentRun[]
+  contentIdeas        ContentIdea[]
+  contentBriefs       ContentBrief[]
+  competitorAnalyses  CompetitorGapAnalysis[]
+  citationOpportunities CitationOpportunity[]
+  actionPlanItems     GeoActionPlanItem[]
+  agentTasks          AgentTask[]
+
+  @@index([organizationId])
+  @@index([userId])
+}
+
+model Competitor {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, domain])
+  @@index([projectId])
+}
+
+model Keyword {
+  id        String   @id @default(cuid())
+  keyword   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  prompts   Prompt[]
+
+  @@unique([projectId, keyword])
+  @@index([projectId])
+}
+
+model Prompt {
+  id        String   @id @default(cuid())
+  text      String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  keywordId String
+  keyword   Keyword  @relation(fields: [keywordId], references: [id], onDelete: Cascade)
+
+  responses ProviderResponse[]
+
+  @@index([keywordId])
+}
+
+model MonitoringJob {
+  id        String   @id @default(cuid())
+  type      String   // daily | weekly | manual
+  status    String   @default("active") // active | paused | archived
+  schedule  String?  // cron expression
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  runs      MonitoringRun[]
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model MonitoringRun {
+  id          String    @id @default(cuid())
+  status      String    @default("pending") // pending | running | completed | failed
+  startedAt   DateTime?
+  completedAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  jobId     String
+  job       MonitoringJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  responses        ProviderResponse[]
+  logs             JobLog[]
+  mentions         Mention[]
+  citations        Citation[]
+  sentimentResults SentimentResult[]
+
+  @@index([jobId])
+  @@index([status])
+}
+
+model ProviderResponse {
+  id           String   @id @default(cuid())
+  provider     String   // openai | gemini | perplexity
+  responseText String   @default("")
+  rawResponse  Json?
+  latencyMs    Int?
+  tokensUsed   Int?
+  status       String   @default("pending") // pending | success | error
+  errorMessage String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  mentions         Mention[]
+  citations        Citation[]
+  sentimentResults SentimentResult[]
+
+  runId    String
+  run      MonitoringRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  promptId String
+  prompt   Prompt        @relation(fields: [promptId], references: [id])
+
+  @@index([runId])
+  @@index([promptId])
+}
+
+model JobLog {
+  id        String   @id @default(cuid())
+  level     String   // info | warn | error
+  message   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  runId String
+  run   MonitoringRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([runId])
+}
+
+model Mention {
+  id        String   @id @default(cuid())
+  brandName String
+  sentiment String   // positive | negative | neutral
+  position  Int?
+  frequency Int      @default(1)
+  createdAt DateTime @default(now())
+
+  responseId String
+  response   ProviderResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  runId      String
+  run        MonitoringRun    @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([runId])
+  @@index([brandName])
+}
+
+model Citation {
+  id        String   @id @default(cuid())
+  url       String
+  domain    String
+  title     String?
+  createdAt DateTime @default(now())
+
+  responseId String
+  response   ProviderResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  runId      String
+  run        MonitoringRun    @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([runId])
+  @@index([domain])
+}
+
+model SentimentResult {
+  id         String   @id @default(cuid())
+  brandName  String
+  score      Float    // -1.0 to 1.0
+  label      String   // positive | negative | neutral
+  confidence Float
+  createdAt  DateTime @default(now())
+
+  responseId String
+  response   ProviderResponse @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  runId      String
+  run        MonitoringRun    @relation(fields: [runId], references: [id], onDelete: Cascade)
+
+  @@index([responseId])
+  @@index([runId])
+  @@index([brandName])
+}
+
+model VisibilityMetric {
+  id              String   @id @default(cuid())
+  brandName       String
+  mentionCount    Int      @default(0)
+  avgPosition     Float?
+  mentionRate     Float    @default(0)
+  competitorName  String?
+  periodStart     DateTime
+  periodEnd       DateTime
+  createdAt       DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([brandName])
+  @@index([periodStart, periodEnd])
+}
+
+model GeoScore {
+  id             String   @id @default(cuid())
+  score          Float    // 0-100 composite GEO score
+  visibilityScore Float   // 0-100
+  positionScore   Float   // 0-100
+  citationScore   Float   // 0-100
+  sentimentScore  Float   // 0-100
+  periodStart     DateTime
+  periodEnd       DateTime
+  createdAt       DateTime @default(now())
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([periodStart, periodEnd])
+}
+
+model Recommendation {
+  id          String   @id @default(cuid())
+  type        String   // content_gap | citation_gap | visibility_gap | sentiment | keyword
+  priority    String   // high | medium | low
+  title       String
+  description String
+  category    String   // content | seo | citations | positioning
+  status      String   @default("open") // open | acknowledged | implemented | dismissed
+  impact      String?  // estimated impact description
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([status])
+  @@index([type])
+}
+
+model Report {
+  id          String    @id @default(cuid())
+  type        String    // weekly | monthly | executive
+  title       String
+  status      String    @default("generating") // generating | completed | failed
+  format      String    // pdf | csv | json
+  fileUrl     String?
+  fileSize    Int?
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model ReportSchedule {
+  id         String   @id @default(cuid())
+  type       String   // weekly | monthly | executive
+  enabled    Boolean  @default(true)
+  dayOfWeek  Int?     // 0-6 for weekly
+  dayOfMonth Int?     // 1-31 for monthly
+  hour       Int      @default(6)
+  nextRunAt  DateTime?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, type])
+  @@index([projectId])
+}
+
+model EmailNotification {
+  id        String   @id @default(cuid())
+  type      String   // weekly_summary | score_change | scan_complete
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String?
+  project   Project? @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, type, projectId])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  action      String
+  entityType  String
+  entityId    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId     String?
+  project       Project?      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  organizationId String?
+  organization  Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([userId])
+  @@index([organizationId])
+}
+
+model AgentRun {
+  id          String   @id @default(cuid())
+  status      String   @default("running")
+  summary     String?
+  itemCount   Int      @default(0)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  contentIdeas          ContentIdea[]
+  contentBriefs         ContentBrief[]
+  competitorAnalyses    CompetitorGapAnalysis[]
+  citationOpportunities CitationOpportunity[]
+  actionPlanItems       GeoActionPlanItem[]
+  tasks                 AgentTask[]
+
+  @@index([projectId])
+  @@index([startedAt])
+}
+
+model ContentIdea {
+  id              String   @id @default(cuid())
+  title           String
+  description     String
+  keyword         String
+  contentType     String
+  rationale       String
+  targetAudience  String?
+  impactScore     Float
+  difficultyScore Float
+  priorityScore   Float
+  status          String   @default("pending")
+  createdAt       DateTime @default(now())
+
+  runId     String
+  run       AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([runId])
+  @@index([status])
+}
+
+model ContentBrief {
+  id              String   @id @default(cuid())
+  title           String
+  targetKeyword   String
+  wordCount       Int
+  structure       Json
+  keyPoints       String[]
+  faqQuestions    String[]
+  internalLinks   String[]
+  targetAudience  String
+  toneOfVoice     String
+  seoNotes        String
+  competitorRefs  String[]
+  callToAction    String
+
+  runId     String
+  run       AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([runId])
+}
+
+model CompetitorGapAnalysis {
+  id                 String   @id @default(cuid())
+  competitorName     String
+  competitorDomain   String
+  gapType            String
+  gapSeverity        String
+  description        String
+  brandStrength      String
+  competitorStrength String
+  actionItems        String[]
+  impactScore        Float
+  difficultyScore    Float
+
+  runId     String
+  run       AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([runId])
+}
+
+model CitationOpportunity {
+  id              String   @id @default(cuid())
+  domain          String
+  domainAuthority String?
+  opportunityType String
+  relevance       String
+  strategy        String
+  competitorRef   String?
+  contactMethod   String?
+  impactScore     Float
+  difficultyScore Float
+
+  runId     String
+  run       AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([runId])
+}
+
+model GeoActionPlanItem {
+  id               String   @id @default(cuid())
+  title            String
+  description      String
+  category         String
+  priority         String
+  timeline         String
+  estimatedEffort  String
+  dependencies     String[]
+  successMetric    String
+  impactScore      Float
+  difficultyScore  Float
+  priorityScore    Float
+  status           String   @default("pending")
+
+  runId     String
+  run       AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([runId])
+}
+
+model AgentTask {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  source      String
+  sourceId    String
+  assignee    String?
+  dueDate     DateTime?
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+
+  runId     String
+  run       AgentRun @relation(fields: [runId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([status])
+}
