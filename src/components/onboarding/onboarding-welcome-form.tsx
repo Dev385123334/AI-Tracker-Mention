@@ -57,11 +57,12 @@ export function OnboardingWelcomeForm({ name }: { name: string }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.5 }}
-        className="grid grid-cols-3 gap-4 w-full max-w-sm"
+        className="grid grid-cols-4 gap-4 w-full max-w-lg"
       >
         {[
           { label: "Brand Setup", desc: "Add your brand details" },
           { label: "Keywords", desc: "Define tracking terms" },
+          { label: "Countries", desc: "Select target regions" },
           { label: "Prompts", desc: "Review AI prompts" },
         ].map((item) => (
           <div key={item.label} className="text-center p-2.5 rounded-xl bg-[#F7F8FC] border border-[#E5E7EB]/60">

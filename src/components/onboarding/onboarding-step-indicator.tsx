@@ -6,8 +6,9 @@ const STEPS = [
   { path: "/onboarding/welcome", number: 1, label: "Welcome", shortLabel: "Hi" },
   { path: "/onboarding/brand", number: 2, label: "Brand", shortLabel: "Brand" },
   { path: "/onboarding/keywords", number: 3, label: "Keywords", shortLabel: "Keywords" },
-  { path: "/onboarding/prompts", number: 4, label: "Prompts", shortLabel: "Prompts" },
-  { path: "/projects", number: 5, label: "Dashboard", shortLabel: "Done" },
+  { path: "/onboarding/countries", number: 4, label: "Countries", shortLabel: "Countries" },
+  { path: "/onboarding/prompts", number: 5, label: "Prompts", shortLabel: "Prompts" },
+  { path: "/projects", number: 6, label: "Dashboard", shortLabel: "Done" },
 ]
 
 export function OnboardingStepIndicator() {

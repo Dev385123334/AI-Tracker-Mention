@@ -14,8 +14,21 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "AI Visibility Tracker",
-  description: "Track your brand visibility across AI search engines",
+  title: { default: "AI Visibility Tracker", template: "%s | AI Visibility Tracker" },
+  description: "Track your brand visibility across AI search engines — monitor how ChatGPT, Gemini, and Perplexity mention your brand",
+  icons: { icon: "/favicon.svg" },
+  openGraph: {
+    title: "AI Visibility Tracker",
+    description: "Track your brand visibility across AI search engines",
+    type: "website",
+    siteName: "AI Visibility Tracker",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AI Visibility Tracker",
+    description: "Track your brand visibility across AI search engines",
+  },
+  robots: { index: true, follow: true },
 }
 
 export default function RootLayout({

@@ -49,13 +49,14 @@ model OrganizationMember {
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  name        String
-  brandName   String
-  domain      String
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  name            String
+  brandName       String
+  domain          String
+  description     String?
+  targetCountries String[]
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)

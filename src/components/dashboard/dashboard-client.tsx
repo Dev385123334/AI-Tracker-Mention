@@ -1,6 +1,7 @@
 "use client"
 
-import { ArrowRight, BarChart3, Search } from "lucide-react"
+import { ArrowRight, BarChart3, Globe, Search } from "lucide-react"
+import { Badge } from "@/components/ui/badge"
 import { CompetitorTable } from "@/components/dashboard/competitor-table"
 import { VisibilityChart } from "@/components/dashboard/visibility-chart"
 import { SourceTypeChart } from "@/components/dashboard/source-type-chart"
@@ -15,6 +16,7 @@ interface DashboardData {
     brandName: string
     domain: string
     description: string | null
+    targetCountries: string[]
   }
   competitors: {
     id: string
@@ -54,7 +56,7 @@ export function DashboardClient({ data }: { data: DashboardData | null }) {
   return (
     <div className="space-y-8 animate-in fade-in duration-500">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
             <BarChart3 className="h-4 w-4" />
@@ -63,6 +65,21 @@ export function DashboardClient({ data }: { data: DashboardData | null }) {
           <h1 className="text-2xl font-bold tracking-tight">{data.project.name}</h1>
           <p className="text-sm text-muted-foreground mt-0.5">{data.project.domain}</p>
         </div>
+        {data.project.targetCountries?.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 max-w-[300px] justify-end">
+            {data.project.targetCountries.slice(0, 3).map((country) => (
+              <Badge key={country} variant="secondary" className="text-xs gap-1">
+                <Globe className="h-3 w-3" />
+                {country}
+              </Badge>
+            ))}
+            {data.project.targetCountries.length > 3 && (
+              <Badge variant="outline" className="text-xs">
+                +{data.project.targetCountries.length - 3}
+              </Badge>
+            )}
+          </div>
+        )}
       </div>
 
       {/* 50/50 Grid */}

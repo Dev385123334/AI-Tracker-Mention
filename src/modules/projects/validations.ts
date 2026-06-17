@@ -6,6 +6,7 @@ export const CreateProjectSchema = z.object({
   domain: z.string().min(1, "Domain is required").max(200),
   description: z.string().max(500).optional(),
   organizationId: z.string().min(1, "Organization is required"),
+  targetCountries: z.array(z.string()).optional(),
 })
 
 export const UpdateProjectSchema = z.object({

@@ -42,6 +42,7 @@ export async function createProject(data: {
   description?: string
   organizationId: string
   userId: string
+  targetCountries?: string[]
 }) {
   return prisma.project.create({ data })
 }

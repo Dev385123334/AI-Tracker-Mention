@@ -122,18 +122,13 @@ export function KeywordsForm() {
       >
         {keywords.length === 0 && (
           <p className="text-xs text-[#9CA3AF]">
-            Add at least 3 keywords to continue
+            Add at least one keyword to continue
           </p>
         )}
-        {keywords.length > 0 && keywords.length < 3 && (
-          <p className="text-xs text-amber-600">
-            Add {3 - keywords.length} more keyword{3 - keywords.length === 1 ? "" : "s"}
-          </p>
-        )}
-        {keywords.length >= 3 && (
+        {keywords.length > 0 && (
           <div className="flex items-center gap-1.5 text-xs text-emerald-600">
             <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
-            {keywords.length} keywords ready
+            {keywords.length} keyword{keywords.length === 1 ? "" : "s"} ready
           </div>
         )}
       </motion.div>
@@ -158,7 +153,7 @@ export function KeywordsForm() {
           type="submit"
           size="lg"
           className="h-12 px-8 text-[15px] font-semibold gap-2 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white shadow-lg shadow-[#7C3AED]/20 hover:shadow-xl hover:shadow-[#7C3AED]/30 border-0 transition-all duration-300"
-          disabled={keywords.length < 3 || pending}
+          disabled={keywords.length < 1 || pending}
         >
           {pending ? "Saving..." : `Continue with ${keywords.length} keywords`}
           <ArrowRight className="h-4 w-4" />

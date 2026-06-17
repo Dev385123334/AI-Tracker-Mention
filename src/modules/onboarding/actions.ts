@@ -43,14 +43,33 @@ export async function saveKeywords(formData: FormData) {
 
   const keywords: string[] = JSON.parse(raw)
 
-  if (!Array.isArray(keywords) || keywords.length < 3) {
-    return { error: "Please add at least 3 keywords" }
+  if (!Array.isArray(keywords) || keywords.length < 1) {
+    return { error: "Please add at least one keyword" }
   }
   if (keywords.some((k) => !k.trim())) {
     return { error: "Keywords cannot be empty" }
   }
 
   await setOnboardingState({ keywords })
+
+  redirect("/onboarding/countries")
+}
+
+export async function saveCountries(formData: FormData) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) throw new Error("Unauthorized")
+
+  const raw = formData.get("countries") as string
+  if (!raw) return { error: "No countries selected" }
+
+  const countries: string[] = JSON.parse(raw)
+
+  if (!Array.isArray(countries) || countries.length === 0) {
+    return { error: "Please select at least one country" }
+  }
+
+  await setOnboardingState({ countries })
 
   redirect("/onboarding/prompts")
 }
@@ -88,6 +107,7 @@ export async function finalizeProject(formData: FormData) {
     ...parsed.data,
     description: parsed.data.description ?? undefined,
     userId: dbUser.id,
+    targetCountries: state.countries ?? [],
   })
 
   const selectedRaw = formData.get("selectedPrompts") as string

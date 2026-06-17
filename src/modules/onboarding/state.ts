@@ -8,6 +8,7 @@ export interface OnboardingState {
   projectName: string
   description?: string
   keywords: string[]
+  countries: string[]
 }
 
 const COOKIE_NAME = "ob_state"

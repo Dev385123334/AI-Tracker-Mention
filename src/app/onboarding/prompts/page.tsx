@@ -15,7 +15,7 @@ const promptTemplates = [
 
 export default async function PromptsPage() {
   const state = await getOnboardingState()
-  if (!state || !state.keywords || state.keywords.length < 3) {
+  if (!state || !state.keywords || state.keywords.length < 1) {
     redirect("/onboarding/keywords")
   }
 
