@@ -7,6 +7,7 @@ import {
   BarChart3,
   FileText,
   LayoutDashboard,
+  Lightbulb,
   Menu,
   MessageSquare,
   Settings,
@@ -26,8 +27,9 @@ const mainNav = [
 
 const analyticsNav = [
   { label: "Discover", href: "/discover", icon: Telescope },
+  { label: "GEO Agent", href: "/geo-agent", icon: Sparkles },
   { label: "Competitors", href: "/competitors", icon: Users },
-  { label: "Recommendations", href: "/recommendations", icon: Sparkles },
+  { label: "Recommendations", href: "/recommendations", icon: Lightbulb },
   { label: "Prompts", href: "/prompts", icon: MessageSquare },
 ]
 
