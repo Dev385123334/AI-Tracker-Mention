@@ -1,42 +1,101 @@
 "use client"
 
-import { motion } from "framer-motion"
+import { useRef } from "react"
+import { motion, useMotionValue, useSpring } from "framer-motion"
 import Link from "next/link"
-import { ArrowRight, BarChart3, Bell, ChevronDown, Globe, LayoutDashboard, LineChart, Search, TrendingUp, Users } from "lucide-react"
+import { ArrowRight, BarChart3, Bell, ChevronDown, Globe, LayoutDashboard, LineChart, Search, TrendingUp, Users, Sparkles } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { ParticleBackground, GradientMesh } from "@/components/landing/particle-background"
 
 const ease = [0.25, 0.1, 0.25, 1] as const
 
-const fadeUp = (delay = 0) => ({
-  initial: { opacity: 0, y: 24 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.6, delay, ease } },
-})
-
 export function HeroSection() {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const mouseX = useMotionValue(0.5)
+  const mouseY = useMotionValue(0.5)
+  const springX = useSpring(mouseX, { stiffness: 50, damping: 20 })
+  const springY = useSpring(mouseY, { stiffness: 50, damping: 20 })
+
+  function handleMouse(e: React.MouseEvent) {
+    const rect = sectionRef.current?.getBoundingClientRect()
+    if (!rect) return
+    mouseX.set((e.clientX - rect.left) / rect.width)
+    mouseY.set((e.clientY - rect.top) / rect.height)
+  }
+
   return (
-    <section className="relative overflow-hidden bg-white">
-      <div className="absolute inset-0 bg-gradient-to-b from-[#F7F8FC] via-white to-white pointer-events-none" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-[#7C3AED]/[0.04] to-transparent rounded-full blur-3xl pointer-events-none" />
+    <section
+      ref={sectionRef}
+      onMouseMove={handleMouse}
+      className="relative overflow-hidden bg-white"
+    >
+      <GradientMesh />
+      <ParticleBackground />
 
-      <div className="relative max-w-[1280px] mx-auto px-6 pt-28 pb-24 lg:pt-36 lg:pb-32">
+      {/* Cursor spotlight */}
+      <motion.div
+        className="absolute pointer-events-none"
+        style={{
+          width: 500,
+          height: 500,
+          borderRadius: "50%",
+          background:
+            "radial-gradient(circle, rgba(124,58,237,0.04) 0%, transparent 70%)",
+          x: useSpring(useMotionValue(0), { stiffness: 30, damping: 30 }),
+          y: useSpring(useMotionValue(0), { stiffness: 30, damping: 30 }),
+          left: 0,
+          top: 0,
+          transform: "translate(-50%, -50%)",
+        }}
+      />
+
+      <div className="relative max-w-[1280px] mx-auto px-6 pt-28 pb-24 lg:pt-36 lg:pb-32" style={{ zIndex: 1 }}>
         <div className="grid lg:grid-cols-2 gap-16 lg:gap-20 items-center">
-          <motion.div {...fadeUp(0)} className="max-w-xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#7C3AED]/5 border border-[#7C3AED]/10 text-xs font-medium text-[#7C3AED] tracking-wide uppercase mb-8">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]" />
+          <motion.div
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0, ease }}
+            className="max-w-xl"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.1, ease }}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#7C3AED]/5 border border-[#7C3AED]/10 text-xs font-medium text-[#7C3AED] tracking-wide uppercase mb-8"
+            >
+              <motion.span
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                className="w-1.5 h-1.5 rounded-full bg-[#7C3AED]"
+              />
               AI Marketing Intelligence Platform
-            </div>
+            </motion.div>
 
-            <h1 className="text-[42px] leading-[1.08] lg:text-[56px] font-bold tracking-[-0.03em] text-[#111827]">
-              Track, Monitor & Grow Your Brand Across AI Search
+            <h1 className="text-[42px] leading-[1.08] lg:text-[56px] font-bold tracking-[-0.03em]">
+              <span className="bg-gradient-to-r from-[#7C3AED] via-[#EC4899] to-[#3B82F6] bg-clip-text text-transparent bg-[length:200%_200%] animate-gradient">
+                Track, Monitor & Grow
+              </span>
+              <br />
+              <span className="text-[#111827]">Your Brand Across AI Search</span>
             </h1>
 
-            <p className="mt-6 text-[17px] leading-relaxed text-[#6B7280] max-w-lg">
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.25, ease }}
+              className="mt-6 text-[17px] leading-relaxed text-[#6B7280] max-w-lg"
+            >
               Understand how ChatGPT, Gemini, Claude, Perplexity, and other AI platforms mention your brand. Monitor visibility, citations, sentiment, competitors, and opportunities from one unified dashboard.
-            </p>
+            </motion.p>
 
-            <div className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.35, ease }}
+              className="mt-10 flex flex-col sm:flex-row items-start sm:items-center gap-4"
+            >
               <Link href="/signup">
-                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
                   <Button
                     size="lg"
                     className="h-13 px-8 text-[15px] font-semibold gap-2 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#EC4899] text-white shadow-lg shadow-[#7C3AED]/20 hover:shadow-xl hover:shadow-[#7C3AED]/30 border-0 transition-all duration-300"
@@ -55,9 +114,14 @@ export function HeroSection() {
                   Book Demo
                 </Button>
               </Link>
-            </div>
+            </motion.div>
 
-            <div className="mt-6 flex items-center gap-6 text-sm text-[#6B7280]">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.45, ease }}
+              className="mt-6 flex items-center gap-6 text-sm text-[#6B7280]"
+            >
               <span className="flex items-center gap-1.5">
                 <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 No credit card required
@@ -66,19 +130,49 @@ export function HeroSection() {
                 <svg className="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" /></svg>
                 14-day free trial
               </span>
-            </div>
+            </motion.div>
           </motion.div>
 
           <motion.div
             initial={{ opacity: 0, y: 32 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+            transition={{ duration: 0.8, delay: 0.2, ease }}
             className="relative"
           >
-            <div className="relative rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl shadow-[#7C3AED]/5 overflow-hidden">
+            <motion.div
+              animate={{ y: [0, -6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              className="relative rounded-2xl border border-[#E5E7EB] bg-white shadow-2xl shadow-[#7C3AED]/10 overflow-hidden"
+            >
               <DashboardMockup />
-            </div>
+            </motion.div>
             <div className="absolute -bottom-4 -right-4 w-full h-full rounded-2xl border border-[#E5E7EB]/40 -z-10" />
+
+            {/* Floating badges */}
+            <motion.div
+              animate={{ y: [0, -8, 0] }}
+              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+              className="absolute -top-3 -right-3 lg:-top-4 lg:-right-4 bg-white rounded-xl border border-[#E5E7EB] shadow-lg px-4 py-2.5 hidden lg:block"
+            >
+              <div className="flex items-center gap-2 text-xs font-medium text-emerald-600">
+                <motion.span
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                  className="w-2 h-2 rounded-full bg-emerald-500"
+                />
+                +18.3% mention growth
+              </div>
+            </motion.div>
+            <motion.div
+              animate={{ y: [0, 6, 0] }}
+              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+              className="absolute -bottom-3 -left-3 lg:-bottom-4 lg:-left-4 bg-white rounded-xl border border-[#E5E7EB] shadow-lg px-4 py-2.5 hidden lg:block"
+            >
+              <div className="flex items-center gap-2 text-xs font-medium text-[#7C3AED]">
+                <Sparkles className="h-3 w-3" />
+                86 AI Visibility Score
+              </div>
+            </motion.div>
           </motion.div>
         </div>
       </div>

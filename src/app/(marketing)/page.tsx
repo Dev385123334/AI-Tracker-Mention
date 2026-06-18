@@ -5,6 +5,7 @@ import { motion } from "framer-motion"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { HeroSection } from "@/components/landing/hero-section"
+import { DashboardCarousel } from "@/components/landing/dashboard-carousel"
 import { ArrowRight, BarChart3, Bell, Check, ChevronDown, FileText, Globe, Menu, MessageSquare, Monitor, PieChart, Search, Sliders, Sparkles, Target, TrendingUp, Users, X } from "lucide-react"
 
 function Navbar() {
@@ -131,28 +132,28 @@ const steps = [
     title: "Choose Keywords & Prompts",
     description: "Track the prompts your customers use across ChatGPT, Gemini, Claude, Perplexity, and more. Define the terms that matter most to your brand.",
     features: ["Unlimited keyword tracking", "AI-powered suggestions", "Prompt category management"],
-    illustration: "🔍",
+    slideIndex: 4,
   },
   {
     step: "02",
     title: "Monitor Brand Visibility",
     description: "See exactly how often AI models mention your brand in responses. Track visibility trends, share of voice, and ranking positions across platforms.",
     features: ["Cross-platform visibility scores", "Trend analysis", "Share of AI voice metrics"],
-    illustration: "📊",
+    slideIndex: 0,
   },
   {
     step: "03",
     title: "Analyze Competitors",
     description: "Compare your AI visibility against competitors. Understand who's winning in AI search and where you need to improve.",
     features: ["Competitor benchmarking", "Gap analysis", "Market intelligence reports"],
-    illustration: "🎯",
+    slideIndex: 2,
   },
   {
     step: "04",
     title: "Optimize AI Search Presence",
     description: "Get actionable recommendations to improve your AI visibility. Track progress with automated reports and real-time alerts.",
     features: ["AI-powered recommendations", "Automated reports", "Real-time alerts"],
-    illustration: "⚡",
+    slideIndex: 3,
   },
 ]
 
@@ -185,27 +186,7 @@ function HowItWorks() {
                 </ul>
               </div>
               <div className={`relative ${i % 2 === 1 ? "lg:order-1" : ""}`}>
-                <div className="rounded-2xl border border-[#E5E7EB] bg-[#FAFAFA] p-8 lg:p-10 shadow-sm">
-                  <div className="text-4xl mb-4">{s.illustration}</div>
-                  <div className="rounded-xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
-                    <div className="flex items-center gap-2 mb-3">
-                      <div className="h-2 w-2 rounded-full bg-destructive" />
-                      <div className="h-2 w-2 rounded-full bg-amber-500" />
-                      <div className="h-2 w-2 rounded-full bg-emerald-500" />
-                      <span className="text-[10px] text-[#6B7280] ml-1">Dashboard Preview</span>
-                    </div>
-                    <div className="h-32 rounded-lg bg-gradient-to-br from-[#7C3AED]/[0.04] via-[#EC4899]/[0.02] to-transparent border border-[#E5E7EB] flex items-center justify-center">
-                      <div className="grid grid-cols-3 gap-3 w-full px-4">
-                        {[...Array(3)].map((_, j) => (
-                          <div key={j} className="h-12 rounded-lg bg-white border border-[#E5E7EB] p-2 flex flex-col justify-center">
-                            <div className="h-1.5 w-8 rounded-full bg-[#E5E7EB]" />
-                            <div className="h-3 w-12 rounded bg-gradient-to-r from-[#7C3AED]/30 to-[#EC4899]/30 mt-1.5" />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                <DashboardCarousel defaultSlide={s.slideIndex} autoRotate={false} />
               </div>
             </motion.div>
           ))}
@@ -394,6 +375,28 @@ function ProductShowcase() {
             </div>
           </div>
         </motion.div>
+      </div>
+    </section>
+  )
+}
+
+function DashboardCarouselSection() {
+  return (
+    <section className="py-24">
+      <div className="max-w-[1280px] mx-auto px-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-3xl md:text-4xl font-bold text-[#111827]">See your dashboard in action</h2>
+          <p className="mt-4 text-[#6B7280] text-lg max-w-2xl mx-auto">
+            Real-time visibility tracking, competitor intelligence, and actionable insights at your fingertips.
+          </p>
+        </motion.div>
+        <DashboardCarousel />
       </div>
     </section>
   )
@@ -842,6 +845,7 @@ export default function LandingPage() {
         <HowItWorks />
         <FeaturesGrid />
         <ProductShowcase />
+        <DashboardCarouselSection />
         <AnalyticsSection />
         <ReportingSection />
         <Testimonials />
